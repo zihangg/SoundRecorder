@@ -121,24 +121,34 @@ public class RecordingService extends Service {
     }
 
     public void stopRecording() {
-        mRecorder.stop();
-        mElapsedMillis = (System.currentTimeMillis() - mStartingTimeMillis);
-        mRecorder.release();
-        Toast.makeText(this, getString(R.string.toast_recording_finish) + " " + mFilePath, Toast.LENGTH_LONG).show();
+        if (System.currentTimeMillis() - mStartingTimeMillis <= 0) {
+            mRecorder.release();
+        } else if (System.currentTimeMillis() - mStartingTimeMillis >= 0) {
+            try {
+                mRecorder.stop();
+            } catch(RuntimeException e) {
+                Toast.makeText(this, "Recording failed. Please record longer durations.", Toast.LENGTH_SHORT).show();
+            } finally {
+                mRecorder.release();
+                mRecorder = null;
+            }
+            mElapsedMillis = (System.currentTimeMillis() - mStartingTimeMillis);
+            Toast.makeText(this, getString(R.string.toast_recording_finish) + " " + mFilePath, Toast.LENGTH_LONG).show();
 
-        //remove notification
-        if (mIncrementTimerTask != null) {
-            mIncrementTimerTask.cancel();
-            mIncrementTimerTask = null;
-        }
+            //remove notification
+            if (mIncrementTimerTask != null) {
+                mIncrementTimerTask.cancel();
+                mIncrementTimerTask = null;
+            }
 
-        mRecorder = null;
+            mRecorder = null;
 
-        try {
-            mDatabase.addRecording(mFileName, mFilePath, mElapsedMillis);
+            try {
+                mDatabase.addRecording(mFileName, mFilePath, mElapsedMillis);
 
-        } catch (Exception e){
-            Log.e(LOG_TAG, "exception", e);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "exception", e);
+            }
         }
     }
 

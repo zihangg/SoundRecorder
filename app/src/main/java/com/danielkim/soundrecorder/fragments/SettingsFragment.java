@@ -1,5 +1,6 @@
 package com.danielkim.soundrecorder.fragments;
 
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
